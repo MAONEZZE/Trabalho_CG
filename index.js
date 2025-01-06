@@ -1,5 +1,5 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js';
-// import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/controls/OrbitControls.js';
+import * as THREE from 'https://unpkg.com/three@0.126.1/build/three.module.js';
+import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js';
 
 // Configuração inicial da cena, câmera e renderizador
 const scene = new THREE.Scene();
@@ -31,15 +31,15 @@ const curve = new THREE.CatmullRomCurve3([
   new THREE.Vector3(40, 0, -10),
   new THREE.Vector3(30, 5, -20),
   new THREE.Vector3(10, 10, -10),
-  new THREE.Vector3(0, 0, 0) // Fechar o circuito
+  new THREE.Vector3(-5, 0, -10) // Fechar o circuito
 ]);
 
 // Geometria e material da pista
 const formatoDoCaminho = new THREE.TubeGeometry(
   curve,
-  300,
-  0.5,
-  20,
+  1000,
+  0.7,
+  2,
   true
 );
 
@@ -47,7 +47,7 @@ const propriedadesDoCaminho = new THREE.MeshStandardMaterial({
   color: 0xff4500,
   emissive: 0x550000,
   metalness: 0.5,
-  roughness: 0.3
+  roughness: 0.1
 });
 
 // Criar a pista
@@ -62,14 +62,14 @@ camera.lookAt(0, 0, 0);
 let progress = 0;
 
 // Controle da câmera (Agora usando a forma correta de instanciar)
-// const controls = new OrbitControls(camera, renderer.domElement);
-// controls.enableDamping = true; // Suavidade no movimento
-// controls.enablePan = true; // Permite o movimento horizontal/vertical da câmera
-// controls.mouseButtons = {
-//   LEFT: THREE.MOUSE.ROTATE,  // Botão esquerdo do mouse para rotacionar
-//   MIDDLE: THREE.MOUSE.DOLLY, // Roda do meio para zoom
-//   RIGHT: THREE.MOUSE.PAN     // Botão direito para movimentar
-// };
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; // Suavidade no movimento
+controls.enablePan = true; // Permite o movimento horizontal/vertical da câmera
+controls.mouseButtons = {
+  LEFT: THREE.MOUSE.ROTATE,  // Botão esquerdo do mouse para rotacionar
+  MIDDLE: THREE.MOUSE.DOLLY, // Roda do meio para zoom
+  RIGHT: THREE.MOUSE.PAN     // Botão direito para movimentar
+};
 
 // Animação da cena
 function animate() {
@@ -85,7 +85,7 @@ function animate() {
   progress += 0.001;
 
   // Atualizar controles da câmera
-  // controls.update(); // Atualiza a posição/visão da câmera com base no controle de órbita
+  controls.update(); // Atualiza a posição/visão da câmera com base no controle de órbita
 
   // Renderizar a cena
   renderer.render(scene, camera);
@@ -98,6 +98,4 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Verificar se o renderizador está funcionando
-console.log("Renderer iniciado!");
 animate();
