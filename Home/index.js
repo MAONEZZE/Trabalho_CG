@@ -20,19 +20,15 @@ luzFocal.position.y = 90;
 luzFocal.position.z = 0;
 scene.add(luzFocal);
 
-const luzAmbiente = new THREE.AmbientLight('#afafaf', 0.8); // Luz ambiente
+const luzAmbiente = new THREE.AmbientLight('#afafaf', 0.8); 
 scene.add(luzAmbiente);
 
-// const luzDirecional = new THREE.DirectionalLight('#ffffff', 0.1); // Luz direcional
-// luzDirecional.position.set(5, 10, 7.5);
-// scene.add(luzDirecional);
-
-// Caminho da pista (curva contínua com subidas, descidas e curvas)
+// Formação da pista
 const pista = new Pista();
 const [pistaMontada, curve, pilares] = pista.MontagemPista();
 scene.add(pistaMontada);
 
-// Grupo do carro
+// Formação do carro
 const carro = new Carro();
 const carroMontado = carro.MontagemCarro();
 scene.add(carroMontado);
@@ -42,40 +38,12 @@ const chao = new Chao(pilares);
 const chaoFormado = chao.CriarChao();
 scene.add(chaoFormado);
 
-// Criando Céu
+// Formação do Céu
 const ceu = new Ceu();
 const ceuMontado = ceu.MontarCeu();
 scene.add(ceuMontado);
 
-// Variável de progresso do carrinho na pista
 let carProgress = 0;
-
-// Função para atualizar a posição e orientação do carrinho
-function AtualizandoPosicaoCarro() {
-  // Obtém a posição do carrinho na curva
-  const posicaoCarro = curve.getPointAt(carProgress);
-
-  // Obtém o vetor tangente na curva para a orientação
-  const tangent = curve.getTangentAt(carProgress);
-
-  // Define a rotação para alinhar o carrinho à curva
-  const normal = new THREE.Vector3(0, 1, 0); // Vetor normal "para cima"
-  const binormal = new THREE.Vector3(); // Binormal da curva
-  binormal.crossVectors(tangent, normal).normalize(); // Calcula a binormal
-  normal.crossVectors(binormal, tangent).normalize(); // Ajusta a normal
-
-  const matrix = new THREE.Matrix4();
-  matrix.makeBasis(tangent, normal, binormal); // Define a base ortogonal da curva
-  carroMontado.setRotationFromMatrix(matrix); // Aplica a rotação ao grupo do carrinho
-
-  // Ajustar a posição do carrinho ligeiramente acima do centro
-  carroMontado.position.copy(posicaoCarro);
-  carroMontado.position.add(normal.multiplyScalar(0.4)); // Elevar o carro para compensar a profundidade da pista
-
-  // Incrementa o progresso do carrinho na curva
-  carProgress += 0.001; // Velocidade do carrinho
-  if (carProgress > 1) carProgress = 0; // Recomeça do início da pista
-}
 
 // Controle da câmera
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -87,9 +55,37 @@ controls.mouseButtons = {
   RIGHT: THREE.MOUSE.PAN     // Botão direito para movimentar
 };
 
-// Ajustar a posição da câmera para garantir visibilidade
-camera.position.set(0, 10, 30);
-camera.lookAt(0, 0, 0);
+// Camera Inicial
+camera.position.set(10, 10, 30);
+
+function AtualizandoPosicaoCarro() {
+  // Pega a posição do carrinho na curva
+  const posicaoCarro = curve.getPointAt(carProgress);
+
+  // Pega a tangente na curva para melhorar a direção do carro
+  const tangent = curve.getTangentAt(carProgress);
+
+  // Define a rotação para alinhar o carrinho à curva
+  const normal = new THREE.Vector3(0, 1, 0); // Vetor normal "para cima"
+  const binormal = new THREE.Vector3(); // Binormal da curva
+  binormal.crossVectors(tangent, normal).normalize(); // Calcula a binormal
+  normal.crossVectors(binormal, tangent).normalize(); // Ajusta a normal
+
+  // Serve para aplicar a rotação do carrinho
+  const matrix = new THREE.Matrix4();
+  matrix.makeBasis(tangent, normal, binormal);
+  carroMontado.setRotationFromMatrix(matrix); 
+
+  // Ajusta a posição do carrinho no eixo y, pra ele não ficar dentro da pista
+  carroMontado.position.copy(posicaoCarro);
+  carroMontado.position.add(normal.multiplyScalar(0.4)); 
+
+  // Incrementa o progresso do carrinho na curva
+  carProgress += 0.001; // Velocidade do carrinho
+  if (carProgress > 1) {
+    carProgress = 0; // Recomeça do início da pista
+  }
+}
 
 // Função de animação
 function animate() {
