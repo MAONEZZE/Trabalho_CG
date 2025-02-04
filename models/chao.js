@@ -7,6 +7,7 @@ class Chao {
 
   LoadTextura(largura, profundidade) {
     const loader = new THREE.TextureLoader();
+    
     const textura = loader.load('./texturaChao/textura.jpg');
     const texturaRugosidade = loader.load('./texturaChao/sombra1.png');
     const texturaNormal = loader.load('./texturaChao/sombra2.jpg');
@@ -39,8 +40,8 @@ class Chao {
       const vz = vertices.getZ(i);
 
       // Arredondar os vértices puxando-os para mais próximo do centro
-      const fator = 15; // Controle de arredondamento (ajustável)
-      const comprimento = Math.sqrt(vx ** 2 + vy ** 2 + vz ** 2); // Distância ao centro
+      const fator = 15; 
+      const comprimento = Math.sqrt(vx ** 2 + vy ** 2 + vz ** 2); 
       vertices.setXYZ(
         i,
         vx + (vx / comprimento) * fator,
@@ -137,7 +138,7 @@ class Chao {
     const chaoFormado = new THREE.Group();
 
     // Criando o chão infinito
-    const geometriaChao = new THREE.PlaneGeometry(600, 600); // Chão infinito
+    const geometriaChao = new THREE.PlaneGeometry(600, 600); 
     const chao = new THREE.Mesh(geometriaChao, this.LoadTextura(20, 20));
     chao.rotation.x = -Math.PI / 2; // Rotaciona o plano para ficar na horizontal
     chao.position.y = -3.6; // Abaixo da pista para evitar interferência

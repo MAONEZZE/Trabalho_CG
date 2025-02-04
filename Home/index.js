@@ -6,14 +6,12 @@ import Pista from '../models/pista.js';
 import Chao from '../models/chao.js';
 import Ceu from '../models/ceu.js';
 
-// Configuração inicial da cena, câmera e renderizador
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const canvas = document.getElementById('canvas');
 const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(window.innerWidth, window.innerHeight);
 
-// Iluminação
 const luzFocal = new THREE.PointLight('#ffe9d3', 0.9); 
 luzFocal.position.x = 250;
 luzFocal.position.y = 90;
@@ -23,22 +21,18 @@ scene.add(luzFocal);
 const luzAmbiente = new THREE.AmbientLight('#afafaf', 0.8); 
 scene.add(luzAmbiente);
 
-// Formação da pista
 const pista = new Pista();
 const [pistaMontada, curve, pilares] = pista.MontagemPista();
 scene.add(pistaMontada);
 
-// Formação do carro
 const carro = new Carro();
 const carroMontado = carro.MontagemCarro();
 scene.add(carroMontado);
 
-// Formação do chão
 const chao = new Chao(pilares);
 const chaoFormado = chao.CriarChao();
 scene.add(chaoFormado);
 
-// Formação do Céu
 const ceu = new Ceu();
 const ceuMontado = ceu.MontarCeu();
 scene.add(ceuMontado);
@@ -61,29 +55,25 @@ camera.position.set(10, 10, 30);
 function AtualizandoPosicaoCarro() {
   // Pega a posição do carrinho na curva
   const posicaoCarro = curve.getPointAt(carProgress);
+  const tangente = curve.getTangentAt(carProgress);
 
-  // Pega a tangente na curva para melhorar a direção do carro
-  const tangent = curve.getTangentAt(carProgress);
+  // rotaciona o carrinho de a cordo com a curva
+  const normal = new THREE.Vector3(0, 1, 0); 
+  const binormal = new THREE.Vector3(); 
+  binormal.crossVectors(tangente, normal).normalize(); 
+  normal.crossVectors(binormal, tangente).normalize(); 
 
-  // Define a rotação para alinhar o carrinho à curva
-  const normal = new THREE.Vector3(0, 1, 0); // Vetor normal "para cima"
-  const binormal = new THREE.Vector3(); // Binormal da curva
-  binormal.crossVectors(tangent, normal).normalize(); // Calcula a binormal
-  normal.crossVectors(binormal, tangent).normalize(); // Ajusta a normal
-
-  // Serve para aplicar a rotação do carrinho
   const matrix = new THREE.Matrix4();
-  matrix.makeBasis(tangent, normal, binormal);
+  matrix.makeBasis(tangente, normal, binormal);
   carroMontado.setRotationFromMatrix(matrix); 
 
-  // Ajusta a posição do carrinho no eixo y, pra ele não ficar dentro da pista
+  // sobe o carrinho pra não ficar no chão
   carroMontado.position.copy(posicaoCarro);
   carroMontado.position.add(normal.multiplyScalar(0.4)); 
 
-  // Incrementa o progresso do carrinho na curva
-  carProgress += 0.001; // Velocidade do carrinho
+  carProgress += 0.001;
   if (carProgress > 1) {
-    carProgress = 0; // Recomeça do início da pista
+    carProgress = 0; 
   }
 }
 
